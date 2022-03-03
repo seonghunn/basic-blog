@@ -1,14 +1,14 @@
-import Post from "./Post";
+import Post from "./pages/Post";
 import PostList from "./PostList"
-import PostInput from "./PostInput"
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 function App() {
   return (
-    <div>
-      <div>
-        <PostInput></PostInput>
-      </div>
-<div><PostList></PostList></div>
-</div>
+    <Router>
+    <Routes>
+      <Route path="/" exact={true} element={<PostList />} />
+      <Route path="/post/:id" element={<Post />}/>
+    </Routes>
+    </Router>
   );
 }
 

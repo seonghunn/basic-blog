@@ -1,5 +1,6 @@
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
+import {useParams} from "react-router-dom";
 
 //textarea의 텍스트 삭제
 function clearText(){
@@ -7,9 +8,9 @@ function clearText(){
 }
 
 //제목을 누르기 전까지는 보이지 않게
-function handleDisplay(e,props){
+function handleDisplay(e,postdata){
         //document.getElementsByClassName("content-area").style.display="none"
-        addHitnum(props);
+        addHitnum(postdata);
         console.log(e.target.nextSibling);//context-area
         console.log(e.target.nextSibling.nextSibling);//update-area
         
@@ -49,22 +50,39 @@ function handleDelete(e){
 }
 
 //기본적인 게시글 구조
-function Post(props){
+function Post(){
+    //useParams는 url params를 가져오게 해줌
+    const {id}=useParams();
+    console.log(id);
 
-    return(
-        <div key={props.id} id={props.id}>
-                <h2 onClick={e=>handleDisplay(e,props)}>{props.id} title:{props.title}</h2>
-                <span className="content-area" >
-                <h3>writer:{props.writer} created:{props.createdAt} hit:{props.hit}</h3>
-                <p>{props.content}</p>
-                </span>
-                <span className="update-area">
-                    <textarea type="text" className="update-box" id={props.id}></textarea>
-                    <button className="update-btn" onClick={e=>handleUpdate(e)}>update</button>
-                    <button className="delete-btn" onClick={e=>handleDelete(e)} >delete</button>
-                </span>
+    const [postdata, setpostdata]=useState([]);
+    //api 서버로부터 데이터를 받아온 뒤, 그 데이터를 viewList에 넣는다
+    useEffect(()=>{
+        axios.get(`http://localhost:8080/post/${id}`).then((res)=>{
+            setpostdata(res.data);
+    })},[]);
+
+    console.log(postdata[0]);
+    
+    return (
+        <div>
+            {postdata.map((data,idx)=>(
+                        <div key={data.id} id={data.id}>
+                        <h2 onClick={e=>handleDisplay(e,data)}>title:{data.title}</h2>
+                        <span className="content-area" >
+                        <h3>writer:{data.writer} created:{data.createdAt} hit:{data.hit}</h3>
+                        <p>{data.content}</p>
+                        </span>
+                        <span className="update-area">
+                            <textarea type="text" className="update-box" id={data.id}></textarea>
+                            <button className="update-btn" onClick={e=>handleUpdate(e)}>update</button>
+                            <button className="delete-btn" onClick={e=>handleDelete(e)} >delete</button>
+                        </span>
+                </div>
+            ))
+            }
         </div>
-    )
-}
+        )
+};
 
 export default Post;
