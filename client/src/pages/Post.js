@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect,useState } from "react";
+import CommentInput from "../CommentInput";
 import {useParams} from "react-router-dom";
 
 //textarea의 텍스트 삭제
@@ -56,15 +57,19 @@ function Post(){
     console.log(id);
 
     const [postdata, setpostdata]=useState([]);
+    const [commentData,setCommentData]=useState([]);
     //api 서버로부터 데이터를 받아온 뒤, 그 데이터를 viewList에 넣는다
     useEffect(()=>{
         axios.get(`http://localhost:8080/post/${id}`).then((res)=>{
-            setpostdata(res.data);
+            console.log(res.data);
+            setpostdata(res.data.post);
+            setCommentData(res.data.comments);
     })},[]);
 
     console.log(postdata[0]);
     
     return (
+        <div>
         <div>
             {postdata.map((data,idx)=>(
                         <div key={data.id} id={data.id}>
@@ -82,7 +87,17 @@ function Post(){
             ))
             }
         </div>
+        <div>
+            <h3>Comments</h3>
+            <CommentInput postid={id}></CommentInput>
+        </div>
+        <div>
+            {commentData.map((data,idx)=>(
+                <div>{data.comment}    {data.commenter}  {data.createdAt}</div>
+            ))}
+        </div>
+        </div>
         )
 };
-
+//CommentInput의 prop으로 id를 넘겨주어 적절한 요청이 가도록 설계
 export default Post;

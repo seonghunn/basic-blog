@@ -1,6 +1,6 @@
 const express = require('express');
 const router=express.Router();
-const {Post}=require("../models/index");//require models/post 를 하는게 아니고, index안에 정의된 post를 사용해야 시퀄라이즈 메소드 사용 가능
+const {Post,Comment}=require("../models/index");//require models/post 를 하는게 아니고, index안에 정의된 post를 사용해야 시퀄라이즈 메소드 사용 가능
 
 //get, 이런거는 req.param으로 쿼리스트링으로
 router.get("/",async(req,res)=>{
@@ -23,10 +23,18 @@ router.get("/:id",async(req,res,next)=>{
                 id:req.params.id
             }
         });
+        //게시글에 해당하는 댓글 불러오기
+        const comments =await Comment.findAll({
+            where:{
+                post_id:req.params.id
+            }
+        })
         if(post.length===0){
             next(new Error("index out of range"));
         }
-        res.status(200).send(post);
+        //json을 응답으로 보낼 때, send로 보내면 두 번째에 res.json을 호출하여 불필요한 호출이 발생
+        res.json({post,comments});
+        //res.status(200).send(post);
     }
     catch(err){
         console.log(err);
@@ -34,24 +42,22 @@ router.get("/:id",async(req,res,next)=>{
     }
 });
 
-//작성자 기준 게시글 불러오기
-/*router.get("/:writer",async(req,res,next)=>{
+//댓글 등록
+router.post("/:id",async(req,res)=>{
     try{
-        const post =await Post.findAll({
-            where:{
-                writer:req.params.writer
-            }
-        });
-        if(post.length===0){
-            next(new Error("writer not found"));
-        }
-        res.status(200).send(post);
+        const data=await Comment.create({
+            commenter:req.body.commenter,
+            comment:req.body.comment,
+            post_id:req.params.id
+        })
+        console.log(data);
+        res.status(201);
     }
     catch(err){
         console.log(err);
         res.status(500);
     }
-})*/
+})
 
 //insert
 router.post("/",async(req,res)=>{
